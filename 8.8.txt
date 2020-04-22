@@ -1,0 +1,19 @@
+service nessusd stop
+curl  https://www.tenable.com/downloads/api/v1/public/pages/nessus/downloads/10204/download?i_agree_to_tenable_license_agreement=true -o nessus880.deb
+dpkg -i nessus880.deb
+mv /opt/nessus/var/nessus/templates/metadata.json /opt/nessus/var/nessus/templates/metadata.json.old1
+mv /opt/nessus/var/nessus/templates/tmp/metadata.json /opt/nessus/var/nessus/templates/tmp/metadata.json.old1
+
+curl -k --header "Host: plugins.nessus.org" "https://52.16.241.207/get.php?f=all-2.0.tar.gz&u=84f20fb9412017633d98a9ea60e0c832&p=ac1d4023e673024d421e8e811fb007bb" -o all-2.0.tar.gz
+mv /opt/nessus/lib/nessus/plugins/ /opt/nessus/lib/nessus/plugins.old
+
+/opt/nessus/sbin/nessuscli update  /root/all-2.0.tar.gz
+
+cp /opt/nessus/lib/nessus/plugins/plugin_feed_info.inc /opt/nessus/lib/nessus/plugins/plugin_feed_info.inc.test1
+cp /opt/nessus/var/nessus/plugin_feed_info.inc /opt/nessus/var/nessus/plugin_feed_info.inc.test1
+cp /opt/nessus/lib/nessus/plugins/scan_info.nasl /opt/nessus/lib/nessus/plugins/scan_info.nasl.test1
+
+sed -i 's/"HomeFeed (Non-commercial use only)"/"ProfessionalFeed (Direct)"/g' /opt/nessus/lib/nessus/plugins/plugin_feed_info.inc
+sed -i 's/"HomeFeed (Non-commercial use only)"/"ProfessionalFeed (Direct)"/g' /opt/nessus/var/nessus/plugin_feed_info.inc
+sed -i 's/Nessus Home/Nessus/g' /opt/nessus/lib/nessus/plugins/scan_info.nasl
+service nessusd start
